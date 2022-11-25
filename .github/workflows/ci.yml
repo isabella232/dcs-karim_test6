@@ -1,0 +1,31 @@
+name: Tests
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches:
+      - main
+jobs:
+
+  Scanning-Terraform-modules-in-repositories:
+    uses: ./.github/workflows/codeScanningTerraformModules.yml
+    with:
+      organization_name: OneCloudAutomation
+      topics: test-git-assurance
+      terraform_dependency_validation: enabled
+    secrets:
+      token: ${{ secrets.token }}
+
+  # TODO: add scanning code
+
+  Undo-tests:
+    needs: [Scanning-Terraform-modules-in-repositories]
+    runs-on: ubuntu-latest
+    steps:   
+      - name: Undo Test Scanning Terraform modules in repositories
+        env:
+          GH_TOKEN: ${{ secrets.token }}
+        run: |-
+              gh api --method DELETE -H "Accept: application/vnd.github+json" repos/OneCloudAutomation/git-assurance-test/git/refs/heads/onecloudatomation-dependabot-autoremediation
+
+      # TODO: add delete branch created on code-scan
